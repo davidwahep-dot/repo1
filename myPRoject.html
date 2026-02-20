@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIP Customer Tip Distribution System</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface2: #334155;
+            --border: #475569;
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --accent2: #818cf8;
+            --green: #34d399;
+            --amber: #fbbf24;
+            --red: #f87171;
+            --manager: #f472b6;
+            --supervisor: #fb923c;
+            --employee: #38bdf8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        /* Controls */
+        .controls {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 24px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .control-group input {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-size: 1rem;
+            width: 120px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .control-group input:focus {
+            border-color: var(--accent);
+        }
+
+        .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #0f172a;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(56, 189, 248, 0.3);
+        }
+
+        /* Legend */
+        .legend {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 28px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .legend-title {
+            font-weight: 700;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .legend-dot.manager { background: var(--manager); }
+        .legend-dot.supervisor { background: var(--supervisor); }
+        .legend-dot.employee { background: var(--employee); }
+        .legend-dot.skip { background: var(--surface2); border: 2px dashed var(--border); }
+        .legend-dot.attend-only {
+            background: transparent;
+            border: 2px solid var(--amber);
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-card .stat-value.manager-color { color: var(--manager); }
+        .stat-card .stat-value.supervisor-color { color: var(--supervisor); }
+        .stat-card .stat-value.employee-color { color: var(--employee); }
+
+        /* Round container */
+        .round-container {
+            margin-bottom: 28px;
+        }
+
+        .round-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .round-badge {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: #0f172a;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .round-info {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .round-pattern {
+            display: flex;
+            gap: 10px;
+            font-size: 0.82rem;
+        }
+
+        .pattern-tag {
+            padding: 3px 10px;
+            border-radius: 10px;
+            font-weight: 600;
+        }
+
+        .pattern-tag.take {
+            background: rgba(52, 211, 153, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(52, 211, 153, 0.3);
+        }
+
+        .pattern-tag.skip {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+        }
+
+        /* Table */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead th {
+            background: var(--surface2);
+            padding: 12px 16px;
+            text-align: center;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--border);
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 10px 16px;
+            text-align: center;
+            border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+            background: var(--surface);
+        }
+
+        tbody tr:hover td {
+            background: var(--surface2);
+        }
+
+        tbody td:first-child {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        /* Tip badges */
+        .tip-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.82rem;
+        }
+
+        .tip-badge.manager {
+            background: rgba(244, 114, 182, 0.15);
+            color: var(--manager);
+            border: 1px solid rgba(244, 114, 182, 0.3);
+        }
+
+        .tip-badge.supervisor {
+            background: rgba(251, 146, 60, 0.15);
+            color: var(--supervisor);
+            border: 1px solid rgba(251, 146, 60, 0.3);
+        }
+
+        .tip-badge.employee {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--employee);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        .tip-badge.skip {
+            background: rgba(71, 85, 105, 0.2);
+            color: var(--text-muted);
+            border: 1px dashed var(--border);
+        }
+
+        /* Attendees cell */
+        .attendees {
+            display: flex;
+            gap: 4px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .attendee-chip {
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .attendee-chip.m {
+            background: rgba(244, 114, 182, 0.15);
+            color: var(--manager);
+        }
+
+        .attendee-chip.b {
+            background: rgba(251, 146, 60, 0.15);
+            color: var(--supervisor);
+        }
+
+        .attendee-chip.e {
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--employee);
+        }
+
+        .attendee-chip.attend-only {
+            background: rgba(251, 191, 36, 0.12);
+            color: var(--amber);
+            border: 1px dashed rgba(251, 191, 36, 0.4);
+        }
+
+        /* Summary table */
+        .summary-section {
+            margin-top: 32px;
+        }
+
+        .summary-section h2 {
+            font-size: 1.2rem;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+
+        .summary-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px;
+        }
+
+        .summary-card h3 {
+            font-size: 0.95rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-card .role-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .summary-card .detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .summary-card .detail span:last-child {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Rules panel */
+        .rules-panel {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 24px;
+        }
+
+        .rules-panel h3 {
+            color: var(--accent);
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .rules-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 8px 24px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            padding: 4px 0;
+        }
+
+        .rule-icon {
+            flex-shrink: 0;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .control-group input {
+                width: 100%;
+            }
+            body {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VIP Customer Tip Distribution System</h1>
+        <p class="subtitle">Fair & consistent tip distribution for VIP customer meetings</p>
+
+        <!-- Rules -->
+        <div class="rules-panel">
+            <h3>Distribution Rules</h3>
+            <div class="rules-list">
+                <div class="rule-item">
+                    <span class="rule-icon">1.</span>
+                    <span>Every meeting: exactly <strong style="color:var(--text)">3 attendees</strong> (M + B + Employee)</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">2.</span>
+                    <span>Manager: <strong style="color:var(--manager)">takes 1 round, skips 1 round</strong></span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">3.</span>
+                    <span>Supervisor: <strong style="color:var(--supervisor)">takes 2 rounds, skips 1 round</strong></span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">4.</span>
+                    <span>Employees: <strong style="color:var(--employee)">fair queue</strong> (E1 &rarr; E2 &rarr; ... &rarr; repeat)</span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">5.</span>
+                    <span>No skipping turns &mdash; <strong style="color:var(--green)">strict order enforced</strong></span>
+                </div>
+                <div class="rule-item">
+                    <span class="rule-icon">6.</span>
+                    <span>Attendance queue: lowest attendance first when <strong style="color:var(--amber)">attending only</strong></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label>Rounds</label>
+                <input type="number" id="roundCount" value="6" min="1" max="50">
+            </div>
+            <div class="control-group">
+                <label>Employees</label>
+                <input type="number" id="employeeCount" value="6" min="1" max="20">
+            </div>
+            <div class="control-group">
+                <label>Customers / Round</label>
+                <input type="number" id="customerCount" value="6" min="1" max="30">
+            </div>
+            <button class="btn btn-primary" onclick="generateDistribution()">Generate Distribution</button>
+        </div>
+
+        <!-- Legend -->
+        <div class="legend">
+            <span class="legend-title">Legend:</span>
+            <div class="legend-item">
+                <span class="legend-dot manager"></span> Manager Tip
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot supervisor"></span> Supervisor Tip
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot employee"></span> Employee Tip
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot attend-only"></span> Attend Only (no tip)
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <!-- Output -->
+        <div id="output"></div>
+
+        <!-- Summary -->
+        <div id="summary"></div>
+    </div>
+
+    <script>
+        function generateDistribution() {
+            const totalRounds = parseInt(document.getElementById('roundCount').value) || 6;
+            const empCount = parseInt(document.getElementById('employeeCount').value) || 6;
+            const customersPerRound = parseInt(document.getElementById('customerCount').value) || 6;
+
+            // ── State tracking ──
+            let mTipTotal = 0;
+            let bTipTotal = 0;
+            const empTipCount = {};
+            const empAttendOnlyCount = {};
+            const empTotalAttendance = {};
+            for (let i = 1; i <= empCount; i++) {
+                const k = 'E' + i;
+                empTipCount[k] = 0;
+                empAttendOnlyCount[k] = 0;
+                empTotalAttendance[k] = 0;
+            }
+
+            // ── Pattern counters (per round) ──
+            // Manager: take 1, skip 1  →  round indices 0-based: 0=take, 1=skip, 2=take, 3=skip …
+            // Supervisor: take 2, skip 1 → 0=take, 1=take, 2=skip, 3=take, 4=take, 5=skip …
+            let mPatternIndex = 0;   // cycles through [take, skip]
+            let bPatternIndex = 0;   // cycles through [take, take, skip]
+
+            // ── Employee tip queue — strict rotating order ──
+            let empTipQueueIndex = 0;
+
+            function getNextTipEmployee() {
+                const idx = empTipQueueIndex % empCount;
+                empTipQueueIndex++;
+                return 'E' + (idx + 1);
+            }
+
+            // ── Attendance-only queue: pick employee with lowest attend-only count,
+            //    break ties by lowest total attendance, then by lowest number.
+            //    excludeSet prevents the same employee attending twice in one round without tip. ──
+            function pickAttendanceEmployee(excludeSet) {
+                let candidates = [];
+                for (let i = 1; i <= empCount; i++) {
+                    const k = 'E' + i;
+                    if (!excludeSet.has(k)) candidates.push(k);
+                }
+                if (candidates.length === 0) {
+                    // all excluded — allow repeats, pick from everyone
+                    for (let i = 1; i <= empCount; i++) candidates.push('E' + i);
+                }
+                candidates.sort((a, b) => {
+                    if (empAttendOnlyCount[a] !== empAttendOnlyCount[b])
+                        return empAttendOnlyCount[a] - empAttendOnlyCount[b];
+                    if (empTotalAttendance[a] !== empTotalAttendance[b])
+                        return empTotalAttendance[a] - empTotalAttendance[b];
+                    return parseInt(a.slice(1)) - parseInt(b.slice(1));
+                });
+                return candidates[0];
+            }
+
+            // ── Generate all rounds ──
+            const allRounds = [];
+
+            for (let r = 1; r <= totalRounds; r++) {
+                // Determine round-level eligibility
+                const mTakesThisRound = (mPatternIndex % 2 === 0);  // take, skip, take, skip …
+                const bTakesThisRound = (bPatternIndex % 3 !== 2);  // take, take, skip, take, take, skip …
+                mPatternIndex++;
+                bPatternIndex++;
+
+                const roundData = {
+                    round: r,
+                    mTakes: mTakesThisRound,
+                    bTakes: bTakesThisRound,
+                    meetings: []
+                };
+
+                // Build the tip queue for this round's meetings.
+                // Priority order within the round:
+                //   1) Manager gets 1 meeting tip (if eligible this round)
+                //   2) Supervisor gets 1 meeting tip (if eligible this round)
+                //   3) Remaining meetings → employees from queue
+                const tipSlots = []; // each entry: { recipient, type }
+
+                if (mTakesThisRound) {
+                    tipSlots.push({ recipient: 'M', type: 'manager' });
+                }
+                if (bTakesThisRound) {
+                    tipSlots.push({ recipient: 'B', type: 'supervisor' });
+                }
+                // Fill remaining slots with employees
+                const empSlotsNeeded = customersPerRound - tipSlots.length;
+                for (let s = 0; s < empSlotsNeeded; s++) {
+                    const emp = getNextTipEmployee();
+                    tipSlots.push({ recipient: emp, type: 'employee' });
+                }
+
+                // Now assign each meeting
+                const attendedOnlyThisRound = new Set();
+
+                for (let m = 0; m < customersPerRound; m++) {
+                    const slot = tipSlots[m];
+                    let thirdPerson;
+                    let isAttendOnly = false;
+
+                    if (slot.type === 'manager' || slot.type === 'supervisor') {
+                        // M or B gets the tip — pick an employee for attendance only
+                        thirdPerson = pickAttendanceEmployee(attendedOnlyThisRound);
+                        empAttendOnlyCount[thirdPerson]++;
+                        empTotalAttendance[thirdPerson]++;
+                        attendedOnlyThisRound.add(thirdPerson);
+                        isAttendOnly = true;
+
+                        if (slot.type === 'manager') mTipTotal++;
+                        else bTipTotal++;
+                    } else {
+                        // Employee gets the tip — they are the 3rd person
+                        thirdPerson = slot.recipient;
+                        empTipCount[thirdPerson]++;
+                        empTotalAttendance[thirdPerson]++;
+                    }
+
+                    roundData.meetings.push({
+                        meetingNum: m + 1,
+                        attendees: ['M', 'B', thirdPerson],
+                        tipRecipient: slot.recipient,
+                        tipType: slot.type,
+                        thirdPerson: thirdPerson,
+                        isAttendOnly: isAttendOnly
+                    });
+                }
+
+                allRounds.push(roundData);
+            }
+
+            renderOutput(allRounds, empCount, totalRounds, customersPerRound,
+                         mTipTotal, bTipTotal, empTipCount, empAttendOnlyCount, empTotalAttendance);
+        }
+
+        function renderOutput(allRounds, empCount, totalRounds, customersPerRound,
+                              mTipTotal, bTipTotal, empTipCount, empAttendOnlyCount, empTotalAttendance) {
+            const totalMeetings = totalRounds * customersPerRound;
+
+            // ── Stats cards ──
+            let statsHTML = `
+                <div class="stat-card">
+                    <div class="stat-label">Total Meetings</div>
+                    <div class="stat-value">${totalMeetings}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Manager Tips</div>
+                    <div class="stat-value manager-color">${mTipTotal}</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Supervisor Tips</div>
+                    <div class="stat-value supervisor-color">${bTipTotal}</div>
+                </div>
+            `;
+            for (let i = 1; i <= empCount; i++) {
+                const k = 'E' + i;
+                statsHTML += `
+                    <div class="stat-card">
+                        <div class="stat-label">${k} Tips</div>
+                        <div class="stat-value employee-color">${empTipCount[k]}</div>
+                    </div>`;
+            }
+            document.getElementById('statsGrid').innerHTML = statsHTML;
+
+            // ── Round tables ──
+            let html = '';
+            for (const rd of allRounds) {
+                // Round header with pattern tags
+                const mTag = rd.mTakes
+                    ? '<span class="pattern-tag take">M: Take</span>'
+                    : '<span class="pattern-tag skip">M: Skip</span>';
+                const bTag = rd.bTakes
+                    ? '<span class="pattern-tag take">B: Take</span>'
+                    : '<span class="pattern-tag skip">B: Skip</span>';
+
+                html += `<div class="round-container">
+                    <div class="round-header">
+                        <span class="round-badge">Round ${rd.round}</span>
+                        <div class="round-pattern">${mTag}${bTag}</div>
+                        <span class="round-info">${rd.meetings.length} meetings</span>
+                    </div>`;
+
+                html += `<div class="table-wrapper"><table>
+                    <thead><tr>
+                        <th>Meeting</th>
+                        <th>Attendees</th>
+                        <th>Tip Recipient</th>
+                        <th>3rd Person Role</th>
+                    </tr></thead><tbody>`;
+
+                for (const mt of rd.meetings) {
+                    // Attendees chips
+                    const chips = mt.attendees.map(a => {
+                        if (a === 'M') return '<span class="attendee-chip m">M</span>';
+                        if (a === 'B') return '<span class="attendee-chip b">B</span>';
+                        if (mt.isAttendOnly && a === mt.thirdPerson)
+                            return `<span class="attendee-chip attend-only">${a}</span>`;
+                        return `<span class="attendee-chip e">${a}</span>`;
+                    }).join('');
+
+                    // Tip badge
+                    let tipHTML;
+                    if (mt.tipType === 'manager')
+                        tipHTML = '<span class="tip-badge manager">M (Manager)</span>';
+                    else if (mt.tipType === 'supervisor')
+                        tipHTML = '<span class="tip-badge supervisor">B (Supervisor)</span>';
+                    else
+                        tipHTML = `<span class="tip-badge employee">${mt.tipRecipient}</span>`;
+
+                    // 3rd person role
+                    let roleHTML;
+                    if (mt.isAttendOnly)
+                        roleHTML = `<span style="color:var(--amber)">${mt.thirdPerson} &mdash; Attend Only</span>`;
+                    else
+                        roleHTML = `<span style="color:var(--green)">${mt.thirdPerson} &mdash; Receives Tip</span>`;
+
+                    html += `<tr>
+                        <td>${mt.meetingNum}</td>
+                        <td><div class="attendees">${chips}</div></td>
+                        <td>${tipHTML}</td>
+                        <td>${roleHTML}</td>
+                    </tr>`;
+                }
+
+                html += '</tbody></table></div></div>';
+            }
+            document.getElementById('output').innerHTML = html;
+
+            // ── Fairness summary ──
+            let summaryHTML = `<div class="summary-section"><h2>Fairness Summary</h2><div class="summary-grid">`;
+
+            summaryHTML += `
+                <div class="summary-card">
+                    <h3><span class="role-dot" style="background:var(--manager)"></span> Manager (M)</h3>
+                    <div class="detail"><span>Tips Received</span><span>${mTipTotal}</span></div>
+                    <div class="detail"><span>Meetings Attended</span><span>${totalMeetings}</span></div>
+                    <div class="detail"><span>Tip Rate</span><span>${((mTipTotal / totalMeetings) * 100).toFixed(1)}%</span></div>
+                </div>`;
+
+            summaryHTML += `
+                <div class="summary-card">
+                    <h3><span class="role-dot" style="background:var(--supervisor)"></span> Supervisor (B)</h3>
+                    <div class="detail"><span>Tips Received</span><span>${bTipTotal}</span></div>
+                    <div class="detail"><span>Meetings Attended</span><span>${totalMeetings}</span></div>
+                    <div class="detail"><span>Tip Rate</span><span>${((bTipTotal / totalMeetings) * 100).toFixed(1)}%</span></div>
+                </div>`;
+
+            for (let i = 1; i <= empCount; i++) {
+                const k = 'E' + i;
+                summaryHTML += `
+                    <div class="summary-card">
+                        <h3><span class="role-dot" style="background:var(--employee)"></span> ${k}</h3>
+                        <div class="detail"><span>Tips Received</span><span>${empTipCount[k]}</span></div>
+                        <div class="detail"><span>Attend Only</span><span>${empAttendOnlyCount[k]}</span></div>
+                        <div class="detail"><span>Total Attendance</span><span>${empTotalAttendance[k]}</span></div>
+                        <div class="detail"><span>Tip Rate</span><span>${empTotalAttendance[k] > 0 ? ((empTipCount[k] / empTotalAttendance[k]) * 100).toFixed(1) : 0}%</span></div>
+                    </div>`;
+            }
+
+            summaryHTML += '</div></div>';
+            document.getElementById('summary').innerHTML = summaryHTML;
+        }
+
+        // Generate on load
+        window.addEventListener('DOMContentLoaded', generateDistribution);
+    </script>
+</body>
+</html>
